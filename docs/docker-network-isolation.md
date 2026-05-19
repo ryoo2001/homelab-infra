@@ -16,7 +16,7 @@ docker network create proxy
 - `reverse-nginx`
 - `halo`
 - `uptime-kuma`，仅用于状态页反代
-- 其他明确需要公网展示的服务
+- 其他明确需要公开访问的服务
 
 管理类服务默认不加入公网链路：
 
