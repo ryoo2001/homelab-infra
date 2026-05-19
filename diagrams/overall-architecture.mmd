@@ -1,0 +1,26 @@
+flowchart TB
+  subgraph Public["Public access"]
+    internet[Internet]
+    cloudflare[Cloudflare DNS/CDN/Access]
+    tunnel[Cloudflare Tunnel]
+    cloudflared[cloudflared container]
+    reverse[reverse-nginx]
+    publicServices[Public services]
+  end
+
+  subgraph Internal["Internal access"]
+    lan[LAN clients]
+    adguard[AdGuard Home DNS]
+    npm[Nginx Proxy Manager]
+    internalServices[Internal services]
+  end
+
+  subgraph Private["Private management"]
+    remote[Remote admin device]
+    tailscale[Tailscale]
+    management[Management services]
+  end
+
+  internet --> cloudflare --> tunnel --> cloudflared --> reverse --> publicServices
+  lan --> adguard --> npm --> internalServices
+  remote --> tailscale --> management

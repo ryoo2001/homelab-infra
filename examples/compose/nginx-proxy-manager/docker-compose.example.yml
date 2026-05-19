@@ -1,0 +1,14 @@
+services:
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx-proxy-manager
+    restart: unless-stopped
+    ports:
+      # LAN entry for internal reverse proxy.
+      - "80:80"
+      - "443:443"
+      # Admin UI should not be exposed publicly.
+      - "81:81"
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt

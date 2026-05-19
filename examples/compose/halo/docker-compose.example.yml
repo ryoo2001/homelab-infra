@@ -1,0 +1,21 @@
+services:
+  halo:
+    image: halohub/halo:latest
+    container_name: halo
+    restart: unless-stopped
+    networks:
+      # Join proxy because the blog frontend is exposed through reverse-nginx.
+      - proxy
+    volumes:
+      - halo-data:/root/.halo2
+    environment:
+      - SPRING_R2DBC_URL=${HALO_DATABASE_URL}
+      - SPRING_R2DBC_USERNAME=${HALO_DATABASE_USER}
+      - SPRING_R2DBC_PASSWORD=${HALO_DATABASE_PASSWORD}
+
+volumes:
+  halo-data:
+
+networks:
+  proxy:
+    external: true

@@ -1,0 +1,14 @@
+services:
+  adguardhome:
+    image: adguard/adguardhome:latest
+    container_name: adguardhome
+    restart: unless-stopped
+    ports:
+      # DNS service for LAN clients.
+      - "53:53/tcp"
+      - "53:53/udp"
+      # Web UI should remain LAN-only or Tailscale-only in the real environment.
+      - "3001:3000/tcp"
+    volumes:
+      - ./work:/opt/adguardhome/work
+      - ./conf:/opt/adguardhome/conf

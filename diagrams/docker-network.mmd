@@ -1,0 +1,19 @@
+flowchart LR
+  cloudflare[Cloudflare] --> cloudflared[cloudflared]
+  cloudflared --> reverse[reverse-nginx]
+
+  subgraph proxy["Docker network: proxy"]
+    cloudflared
+    reverse
+    halo[halo]
+    kuma[uptime-kuma status]
+  end
+
+  subgraph private["Internal or private networks"]
+    npm[Nginx Proxy Manager]
+    adguard[AdGuard Home]
+    portainer[Portainer]
+  end
+
+  reverse --> halo
+  reverse --> kuma

@@ -1,0 +1,10 @@
+tunnel: ${TUNNEL_ID}
+credentials-file: /etc/cloudflared/${TUNNEL_ID}.json
+
+ingress:
+  # Public services are forwarded to reverse-nginx inside the Docker proxy network.
+  - hostname: blog.yuuyan.top
+    service: http://reverse-nginx:80
+  - hostname: status.yuuyan.top
+    service: http://reverse-nginx:80
+  - service: http_status:404

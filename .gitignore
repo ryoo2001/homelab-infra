@@ -1,0 +1,39 @@
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Secrets and certificates
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*.jks
+credentials.json
+certs/
+secrets/
+
+# Runtime data
+data/
+work/
+conf/
+letsencrypt/
+backups/
+*.sqlite
+*.db
+
+# Logs
+*.log
+logs/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Temporary files
+tmp/
+temp/
+*.tmp

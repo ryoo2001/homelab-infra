@@ -1,0 +1,20 @@
+services:
+  reverse-nginx:
+    image: nginx:stable-alpine
+    container_name: reverse-nginx
+    restart: unless-stopped
+    networks:
+      - proxy
+    volumes:
+      # Public entry configuration. Keep real configs private and publish only redacted examples.
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./conf.d:/etc/nginx/conf.d:ro
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  proxy:
+    external: true

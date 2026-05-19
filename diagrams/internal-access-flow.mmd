@@ -1,0 +1,12 @@
+sequenceDiagram
+  participant Client as LAN client
+  participant DNS as AdGuard Home
+  participant NPM as Nginx Proxy Manager
+  participant Service as Internal service
+
+  Client->>DNS: Resolve home.yuu.lan
+  DNS-->>Client: Return internal proxy address
+  Client->>NPM: Request home.yuu.lan
+  NPM->>Service: Proxy to internal service
+  Service-->>NPM: Response
+  NPM-->>Client: Response

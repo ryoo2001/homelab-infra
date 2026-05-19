@@ -1,0 +1,17 @@
+sequenceDiagram
+  participant User as Internet user
+  participant CF as Cloudflare
+  participant Tunnel as Cloudflare Tunnel
+  participant C as cloudflared
+  participant N as reverse-nginx
+  participant S as Public service
+
+  User->>CF: Request blog.yuuyan.top
+  CF->>Tunnel: Route public hostname
+  Tunnel->>C: Forward through tunnel
+  C->>N: HTTP request inside proxy network
+  N->>S: proxy_pass by server_name/path
+  S-->>N: Response
+  N-->>C: Response
+  C-->>CF: Response
+  CF-->>User: HTTPS response
