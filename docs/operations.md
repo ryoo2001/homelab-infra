@@ -1,10 +1,10 @@
 # 运维流程
 
-本页记录 HomeLab 的日常维护方式，重点是可重复、可回滚和可排查。
+本页记录 HomeLab 的日常维护方式。目标很简单：改动能复现，出问题能回退，也能查到原因。
 
 ## 目录约定
 
-建议真实环境中按服务拆分 Compose 项目：
+真实环境按服务拆分 Compose 项目：
 
 ```text
 /data/compose/
@@ -42,7 +42,7 @@ docker exec reverse-nginx nginx -s reload
 
 ## 备份建议
 
-优先备份：
+优先备份这些内容：
 
 - Halo 数据库和附件。
 - Uptime Kuma 数据目录。
@@ -50,11 +50,11 @@ docker exec reverse-nginx nginx -s reload
 - Homepage 配置。
 - reverse-nginx 配置。
 
-Homepage 示例见 `examples/compose/homepage/`，内容保留了服务分组、公开/内网区分和允许主机设置，但不包含真实内网地址。
+Homepage 示例在 `examples/compose/homepage/`，里面保留了服务分组、公开/内网区分和允许主机设置。
 
 备份文件不应直接进入公开仓库。公开仓库只记录备份策略，不记录真实备份包。
 
-## 监控建议
+## 监控项
 
 Uptime Kuma 至少监控：
 
@@ -64,4 +64,4 @@ Uptime Kuma 至少监控：
 - Tunnel 可用性
 - Nginx 入口服务
 
-公开状态页只保留用户需要看到的服务状态，不暴露内部管理服务清单。
+公开状态页只显示状态页内容，不暴露内部管理服务清单。

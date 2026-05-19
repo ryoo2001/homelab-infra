@@ -1,6 +1,6 @@
 # 故障排查
 
-本页沉淀 HomeLab 常见问题的排查路径。
+本页记录 HomeLab 常见问题的排查路径。
 
 ## 公网访问 502
 
@@ -39,7 +39,7 @@ docker network inspect proxy
 优先检查：
 
 - `HOMEPAGE_ALLOWED_HOSTS` 是否包含当前访问域名。
-- `services.yaml` 是否和当前环境的域名、IP 对齐。
+- `services.yaml` 是否和当前环境的域名对齐。
 - `widgets.yaml` 或自定义脚本是否引用了不存在的目标。
 
 ## Tunnel 不通
@@ -76,10 +76,10 @@ docker inspect cloudflared
 
 ## Uptime Kuma 状态页误进后台
 
-公网 Nginx 应只允许状态页路径：
+公网 Nginx 只允许状态页路径：
 
 - `/status/` 允许代理。
-- `/` 可跳转到状态页。
+- `/` 跳转到状态页。
 - 其他路径返回 `403`。
 
 示例见 [status.yuuyan.top.example.conf](../examples/nginx/status.yuuyan.top.example.conf)。
