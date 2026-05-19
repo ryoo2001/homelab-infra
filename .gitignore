@@ -19,6 +19,7 @@ data/
 work/
 conf/
 letsencrypt/
+yaml/
 backups/
 *.sqlite
 *.db
