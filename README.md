@@ -96,7 +96,6 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 | 路径 | 说明 |
 | --- | --- |
 | [docs/dual-nginx-design.md](docs/dual-nginx-design.md) | 为什么不用传统 DNS 分流，而是用两个 Nginx + proxy 网络 |
-| [docs/docker-network-isolation.md](docs/docker-network-isolation.md) | Docker `proxy` 网络的隔离边界 |
 | [docs/operations-guide.md](docs/operations-guide.md) | 日常维护与故障排查 |
 | [examples/compose/](examples/compose/) | 脱敏后的 Compose 样例 |
 | [examples/nginx/](examples/nginx/) | 脱敏后的 Nginx 反代样例 |
