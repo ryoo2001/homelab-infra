@@ -23,6 +23,12 @@ backups/
 *.sqlite
 *.db
 
+# Local reports and source documents
+HomeLab_.docx
+HomeLab_.pdf
+*.docx
+*.pdf
+
 # Logs
 *.log
 logs/
