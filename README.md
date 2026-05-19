@@ -37,25 +37,32 @@
 
 ## 架构图
 
+公开访问：
+
 ```mermaid
 flowchart LR
-  subgraph Public["公开访问"]
-    direction LR
-    internet[Internet] --> cf[Cloudflare] --> tunnel[Tunnel] --> cloudflared[cloudflared] --> reverse[reverse-nginx] --> publicServices[Halo / Kuma status]
-  end
+  internet[Internet] --> cf[Cloudflare]
+  cf --> tunnel[Cloudflare Tunnel]
+  tunnel --> cloudflared[cloudflared]
+  cloudflared --> reverse[reverse-nginx]
+  reverse --> publicServices[Halo / Kuma status]
+```
 
-  subgraph LAN["内网访问"]
-    direction LR
-    lanClient[LAN clients] --> adguard[AdGuard Home] --> npm[Nginx Proxy Manager] --> internalServices[Homepage / Kuma / AdGuard]
-  end
+内网访问：
 
-  subgraph Private["私有管理"]
-    direction LR
-    remote[Remote device] --> tailscale[Tailscale] --> management[SSH / Portainer / admin panels]
-  end
+```mermaid
+flowchart LR
+  lanClient[LAN clients] --> adguard[AdGuard Home]
+  adguard --> npm[Nginx Proxy Manager]
+  npm --> internalServices[Homepage / Kuma / AdGuard]
+```
 
-  Public ~~~ LAN
-  LAN ~~~ Private
+私有管理：
+
+```mermaid
+flowchart LR
+  remote[Remote device] --> tailscale[Tailscale]
+  tailscale --> management[SSH / Portainer / admin panels]
 ```
 
 ## 访问与安全边界
