@@ -135,5 +135,5 @@ adguard.yuu.lan
 
 ## 相关文档
 
-- [docs/architecture.md](architecture.md)
+- [README.md](../README.md)
 - [docs/docker-network-isolation.md](docker-network-isolation.md)

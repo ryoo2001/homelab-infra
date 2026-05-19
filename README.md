@@ -4,7 +4,7 @@
 
 ## 项目总览
 
-这个仓库记录我的 HomeLab 结构、访问边界和脱敏配置样例。真实配置保留在本地环境，仓库里不放真实密钥、后台入口、内网地址表或 Tailscale 设备信息。
+这个仓库记录我的 HomeLab 结构、访问边界和脱敏配置样例。
 
 ## 项目目标
 
@@ -33,25 +33,67 @@
 | --- | --- | --- |
 | 公开访问 | `Internet -> Cloudflare -> Tunnel -> cloudflared -> reverse-nginx -> service` | Halo 前台、Uptime Kuma 状态页 |
 | 内网访问 | `LAN -> AdGuard Home -> Nginx Proxy Manager -> service` | Homepage、Kuma 后台、AdGuard 管理页 |
-| 私有管理 | `Remote device -> Tailscale -> home-server -> service` | SSH、Portainer、后台面板 |
+| 私有管理 | `Remote device -> Tailscale -> home-server -> service` | SSH、Portainer、系统维护入口 |
 
 ## 架构图
 
 ```mermaid
-flowchart LR
-  internet[Internet] --> cf[Cloudflare DNS/CDN/Access]
-  cf --> tunnel[Cloudflare Tunnel]
-  tunnel --> cloudflared[cloudflared]
-  cloudflared --> reverse[reverse-nginx]
-  reverse --> publicServices[Public services]
+flowchart TB
+  subgraph Public["公开访问区"]
+    internet[Internet]
+    cf[Cloudflare DNS/CDN/Access]
+    tunnel[Cloudflare Tunnel]
+    cloudflared[cloudflared]
+    reverse[reverse-nginx]
+    blog[Halo blog]
+    status[Uptime Kuma status page]
+  end
 
-  lan[LAN clients] --> adguard[AdGuard Home DNS]
-  adguard --> npm[Nginx Proxy Manager]
-  npm --> internalServices[Internal services]
+  subgraph LAN["局域网访问区"]
+    lanClient[LAN clients]
+    adguard[AdGuard Home]
+    npm[Nginx Proxy Manager]
+    homepage[Homepage]
+    internalKuma[Uptime Kuma dashboard]
+  end
 
-  remote[Remote admin device] --> tailscale[Tailscale]
-  tailscale --> management[Management services]
+  subgraph Private["私有管理区"]
+    remote[Remote admin device]
+    tailscale[Tailscale]
+    ssh[SSH]
+    portainer[Portainer]
+  end
+
+  internet --> cf --> tunnel --> cloudflared --> reverse
+  reverse --> blog
+  reverse --> status
+
+  lanClient --> adguard --> npm
+  npm --> homepage
+  npm --> internalKuma
+
+  remote --> tailscale
+  tailscale --> ssh
+  tailscale --> portainer
 ```
+
+## 访问与安全边界
+
+HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放在不同入口里，不混在一条链路上。
+
+| 等级 | 服务类型 | 访问方式 |
+| --- | --- | --- |
+| 公开访问 | 博客前台、公开状态页 | `yuuyan.top` 子域名 |
+| 认证访问 | 偶尔需要外部访问的入口 | Cloudflare Access |
+| 私有管理 | SSH、Portainer、AdGuard、NPM、后台面板 | LAN 或 Tailscale |
+
+公网只放低风险内容：
+
+- Halo 前台可以公开。
+- Uptime Kuma 只公开状态页，不公开控制台。
+- Homepage 如果展示内部服务清单，只放在内网入口。
+
+所有公网流量应先经过 Cloudflare，再通过 Tunnel 进入内网。家庭宽带侧不直接开放 80/443。Tailscale 用于 SSH、Portainer、NPM、AdGuard Home 和 Uptime Kuma 控制台这类私有管理入口。
 
 ## 设计亮点
 
@@ -65,16 +107,31 @@ flowchart LR
 
 | 路径 | 说明 |
 | --- | --- |
-| [docs/architecture.md](docs/architecture.md) | 总体架构与三条访问链路 |
 | [docs/dual-nginx-design.md](docs/dual-nginx-design.md) | 为什么不用传统 DNS 分流，而是用两个 Nginx + proxy 网络 |
 | [docs/docker-network-isolation.md](docs/docker-network-isolation.md) | Docker `proxy` 网络的隔离边界 |
-| [docs/security-design.md](docs/security-design.md) | 服务分级与公开边界 |
-| [docs/operations.md](docs/operations.md) | 日常维护与变更流程 |
-| [docs/troubleshooting.md](docs/troubleshooting.md) | 常见故障排查路径 |
-| [docs/roadmap.md](docs/roadmap.md) | 当前整理进度 |
+| [docs/operations-guide.md](docs/operations-guide.md) | 日常维护与故障排查 |
 | [examples/compose/](examples/compose/) | 脱敏后的 Compose 样例 |
 | [examples/nginx/](examples/nginx/) | 脱敏后的 Nginx 反代样例 |
 | [examples/dns/](examples/dns/) | 内网 DNS rewrite 样例 |
+
+## 当前进度
+
+已完成：
+
+- [x] HomeLab 总体架构整理。
+- [x] 公网、内网、私有管理三条链路拆分。
+- [x] 两个 Nginx + proxy 网络设计整理。
+- [x] Docker `proxy` 网络隔离设计整理。
+- [x] 初始公开样例配置整理。
+
+待补充：
+
+- [ ] 脱敏截图和服务关系示意。
+- [ ] AdGuard Home DNS rewrite 实际维护经验。
+- [ ] 自动化备份策略。
+- [ ] 日志分析流程。
+- [ ] 服务升级与回滚流程。
+- [ ] 关键服务告警渠道。
 
 ## License
 
