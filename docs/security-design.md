@@ -18,7 +18,11 @@ HomeLab 的安全目标是减少公网暴露面，并把不同风险等级的服
 - Uptime Kuma 只公开状态页，不公开控制台。
 - Homepage 如包含内部服务清单，不建议完全公开。
 
+仓库中的 Homepage 样例只保留分组和入口结构，真实内网地址、私有面板和远程管理入口应继续脱敏。
+
 所有公网流量应先经过 Cloudflare，再通过 Tunnel 进入内网。家庭宽带侧不直接开放 80/443。
+
+Cloudflare 的公开入口样例只保留 hostname 和转发目标，不保留 token、账号或 Access 规则细节。
 
 ## Cloudflare Access
 

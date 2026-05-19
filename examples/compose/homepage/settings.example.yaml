@@ -1,0 +1,31 @@
+title: Yuuyan HomeLab
+description: Local service dashboard
+
+language: zh-CN
+target: _blank
+
+hideVersion: true
+statusStyle: dot
+headerStyle: boxed
+useEqualHeights: true
+
+layout:
+  核心管理:
+    style: row
+    columns: 4
+    icon: mdi-server-security
+
+  公网服务:
+    style: row
+    columns: 3
+    icon: mdi-web
+
+  内网服务:
+    style: row
+    columns: 4
+    icon: mdi-lan
+
+  网络与穿透:
+    style: row
+    columns: 4
+    icon: mdi-cloud-lock

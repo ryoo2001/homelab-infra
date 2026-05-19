@@ -34,6 +34,14 @@ docker network inspect proxy
 - DNS rewrite 是否包含目标域名。
 - NPM proxy host 是否配置正确。
 
+## Homepage 页面不显示服务
+
+优先检查：
+
+- `HOMEPAGE_ALLOWED_HOSTS` 是否包含当前访问域名。
+- `services.yaml` 是否和当前环境的域名、IP 对齐。
+- `widgets.yaml` 或自定义脚本是否引用了不存在的目标。
+
 ## Tunnel 不通
 
 检查：
@@ -48,6 +56,14 @@ docker inspect cloudflared
 - Tunnel token 失效。
 - `cloudflared` 容器没有加入 `proxy` 网络。
 - Cloudflare public hostname 指向了不存在的服务名。
+
+## Cloudflare Tunnel 连通但页面 404
+
+优先检查：
+
+- `config.example.yml` 里的 hostname 是否和 Nginx `server_name` 一致。
+- `reverse-nginx` 是否真的在 `proxy` 网络里。
+- 入口路径是否被公共 Nginx 的 `location` 规则拦截。
 
 ## Tailscale 能 ping 但服务打不开
 

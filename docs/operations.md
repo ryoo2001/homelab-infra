@@ -50,6 +50,8 @@ docker exec reverse-nginx nginx -s reload
 - Homepage 配置。
 - reverse-nginx 配置。
 
+Homepage 示例见 `examples/compose/homepage/`，内容保留了服务分组、公开/内网区分和允许主机设置，但不包含真实内网地址。
+
 备份文件不应直接进入公开仓库。公开仓库只记录备份策略，不记录真实备份包。
 
 ## 监控建议

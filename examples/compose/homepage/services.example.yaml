@@ -1,0 +1,63 @@
+- 核心管理:
+    - Portainer:
+        icon: portainer.png
+        href: http://home.yuu.lan:9000
+        description: Docker 图形化管理
+        ping: http://home.yuu.lan:9000
+
+    - Nginx Proxy Manager:
+        icon: nginx-proxy-manager.png
+        href: http://home.yuu.lan:81
+        description: 内网反向代理管理
+        ping: http://home.yuu.lan:81
+
+    - AdGuard Home:
+        icon: adguard-home.png
+        href: http://home.yuu.lan:3001
+        description: 内网 DNS 服务器
+        ping: http://home.yuu.lan:3001
+
+    - Uptime Kuma:
+        icon: uptime-kuma.png
+        href: http://home.yuu.lan:3001/status/home
+        description: 监控服务
+        ping: http://home.yuu.lan:3001/status/home
+
+- 公网服务:
+    - Blog:
+        icon: halo.png
+        href: https://blog.example.com
+        description: 个人博客 / 展示页
+        ping: https://blog.example.com
+
+    - Blog 管理后台:
+        icon: halo.png
+        href: https://admin.example.com
+        description: 个人博客管理后台
+
+    - Status Page:
+        icon: uptime-kuma.png
+        href: https://status.example.com
+        description: 对外状态页
+        ping: https://status.example.com
+
+- 网络与穿透:
+    - Cloudflare Tunnel:
+        icon: cloudflare.png
+        href: https://dash.cloudflare.com
+        description: 隧道管理
+
+    - Tailscale:
+        icon: tailscale.png
+        href: https://login.tailscale.com/admin/machines
+        description: 远程私有网络
+
+    - 原生 Nginx:
+        icon: nginx.png
+        href: http://nginx.yuu.lan
+        description: 外网入口反代 / 负载均衡
+
+    - Mihomo 控制面板:
+        icon: clash.png
+        href: http://home.yuu.lan:9090/ui
+        description: Clash / Mihomo Web 控制端

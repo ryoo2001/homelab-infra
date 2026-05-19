@@ -93,8 +93,10 @@ flowchart LR
 | `docs/` | 架构、安全、运维、故障排查和路线图文档 |
 | `diagrams/` | Mermaid 架构图源码 |
 | `examples/compose/` | 脱敏后的 Docker Compose 样例 |
+| `examples/compose/homepage/` | Homepage 脱敏配置样例 |
 | `examples/nginx/` | 脱敏后的 Nginx 反代样例 |
 | `examples/dns/` | 内网 DNS rewrite 说明样例 |
+| `yaml/` | 本地整理草稿，不进入仓库追踪 |
 | `assets/screenshots/` | 脱敏截图占位目录 |
 
 ## 当前状态
