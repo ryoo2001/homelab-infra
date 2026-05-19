@@ -38,43 +38,24 @@
 ## 架构图
 
 ```mermaid
-flowchart TB
-  subgraph Public["公开访问区"]
-    internet[Internet]
-    cf[Cloudflare DNS/CDN/Access]
-    tunnel[Cloudflare Tunnel]
-    cloudflared[cloudflared]
-    reverse[reverse-nginx]
-    blog[Halo blog]
-    status[Uptime Kuma status page]
+flowchart LR
+  subgraph Public["公开访问"]
+    direction LR
+    internet[Internet] --> cf[Cloudflare] --> tunnel[Tunnel] --> cloudflared[cloudflared] --> reverse[reverse-nginx] --> publicServices[Halo / Kuma status]
   end
 
-  subgraph LAN["局域网访问区"]
-    lanClient[LAN clients]
-    adguard[AdGuard Home]
-    npm[Nginx Proxy Manager]
-    homepage[Homepage]
-    internalKuma[Uptime Kuma dashboard]
+  subgraph LAN["内网访问"]
+    direction LR
+    lanClient[LAN clients] --> adguard[AdGuard Home] --> npm[Nginx Proxy Manager] --> internalServices[Homepage / Kuma / AdGuard]
   end
 
-  subgraph Private["私有管理区"]
-    remote[Remote admin device]
-    tailscale[Tailscale]
-    ssh[SSH]
-    portainer[Portainer]
+  subgraph Private["私有管理"]
+    direction LR
+    remote[Remote device] --> tailscale[Tailscale] --> management[SSH / Portainer / admin panels]
   end
 
-  internet --> cf --> tunnel --> cloudflared --> reverse
-  reverse --> blog
-  reverse --> status
-
-  lanClient --> adguard --> npm
-  npm --> homepage
-  npm --> internalKuma
-
-  remote --> tailscale
-  tailscale --> ssh
-  tailscale --> portainer
+  Public ~~~ LAN
+  LAN ~~~ Private
 ```
 
 ## 访问与安全边界
