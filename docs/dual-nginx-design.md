@@ -1,6 +1,6 @@
 # 双 Nginx 入口架构
 
-本文档覆盖公网和内网两条访问链路的设计决策、组件职责和配置方式。私有管理链路（Tailscale）见 [README.md](../README.md)。
+本文档覆盖公网和内网两条访问链路的设计决策、组件职责和配置方式。私有管理链路（WireGuard + DDNS-Go）见 [wireguard-ddnsgo-design.md](wireguard-ddnsgo-design.md)。
 
 本项目没有采用"单套 DNS 视图 + 内外网分流"的做法，而是把分流放在入口层：公网入口交给 `reverse-nginx`，内网入口交给 Nginx Proxy Manager，后端服务通过 Docker `proxy` 网络转发。
 
@@ -40,7 +40,7 @@ flowchart TB
   end
 
   subgraph Private["私有管理入口"]
-    ts[Tailscale]
+    ts[WireGuard]
     mgmt[管理面板 / SSH]
   end
 
@@ -65,7 +65,7 @@ flowchart TB
 
 内网链路服务局域网设备，比如 Homepage、Kuma 后台和 AdGuard 管理页。AdGuard Home 只做名字解析和局域网入口落点，反代和站点维护交给 NPM。
 
-私有管理链路通过 Tailscale 访问，不经过任何 Nginx 入口，适合 SSH、Portainer 和其他管理面板。
+私有管理链路通过 WireGuard VPN 访问，不经过任何 Nginx 入口，适合 SSH、Portainer 和其他管理面板。
 
 ### 职责边界
 
@@ -76,7 +76,7 @@ flowchart TB
 | `reverse-nginx` | 公开域名、路径限制、公开状态页 | 内网管理入口 |
 | Nginx Proxy Manager | `*.yuu.lan` 内网入口 | 公网暴露策略 |
 | Docker `proxy` 网络 | 入口层到后端容器的可达面 | 应用认证和权限控制 |
-| Tailscale | 私有管理入口（SSH、Portainer、后台面板）| 公网访问、内网服务分流 |
+| WireGuard + DDNS-Go | 私有管理入口（SSH、Portainer、后台面板）| 公网访问、内网服务分流 |
 
 ## proxy 网络怎么配合
 
@@ -112,7 +112,7 @@ networks:
 - `uptime-kuma`，仅用于状态页或内网控制台
 - 其他明确需要被入口层访问的服务
 
-这些服务不应加入 `proxy` 网络，因为它们属于管理面，加入后会绕过 Tailscale 访问边界，使其可能经由入口层被访问：
+这些服务不应加入 `proxy` 网络，因为它们属于管理面，加入后会绕过 WireGuard 访问边界，使其可能经由入口层被访问：
 
 - Portainer
 - AdGuard Home 管理面
@@ -154,8 +154,8 @@ Compose 目录布局见[运维指南 · 目录约定](operations-guide.md#目录
 - 公开入口和内网入口分开维护。
 - 只有需要被入口层访问的服务才加入 `proxy` 网络。
 - Docker 网络隔离不能替代应用认证和访问控制。
-- 管理面板默认不进入公网链路，通过 Tailscale 访问。
-- Uptime Kuma 可以公开状态页，但控制台应通过内网或 Tailscale 访问。
+- 管理面板默认不进入公网链路，通过 WireGuard VPN 访问。
+- Uptime Kuma 可以公开状态页，但控制台应通过内网或 WireGuard VPN 访问。
 
 具体变更步骤见[运维指南 · 配置变更流程](operations-guide.md#配置变更流程)。
 

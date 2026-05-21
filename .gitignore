@@ -40,6 +40,9 @@ Thumbs.db
 .idea/
 .vscode/
 
+# Draft deployment notes (not formal docs)
+docs/wireguard-ddnsgo-deployment.md
+
 # Temporary files
 tmp/
 temp/

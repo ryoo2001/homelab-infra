@@ -60,10 +60,16 @@ docker logs adguardhome --tail=100
 docker logs uptime-kuma --tail=100
 ```
 
-**Tailscale**
+**WireGuard**
 
 ```bash
-tailscale status
+sudo wg show
+```
+
+**DDNS-Go**
+
+```bash
+docker logs ddns-go --tail=100
 ```
 
 ## 配置变更流程
@@ -73,7 +79,7 @@ tailscale status
    - Nginx：`docker exec reverse-nginx nginx -t`
    - Compose：`docker compose config`（在对应服务目录执行）
 3. 重载服务。
-4. 验证公网、内网、Tailscale 三类访问路径。变更前可参考[职责边界](dual-nginx-design.md#职责边界)确认影响范围。
+4. 验证公网、内网、WireGuard 三类访问路径。变更前可参考[职责边界](dual-nginx-design.md#职责边界)确认影响范围。
 5. 记录变更原因和结果。
 6. 必要时同步更新对应文档、架构图或截图。
 
@@ -100,7 +106,7 @@ Uptime Kuma 至少监控：
 - Tunnel 可用性
 - Nginx 入口服务
 
-Uptime Kuma 管理界面通过内网（`kuma.yuu.lan`）或 Tailscale 访问，监控项在 Web UI 中配置。公开状态页只显示状态页内容，不暴露内部管理服务清单。
+Uptime Kuma 管理界面通过内网（`kuma.yuu.lan`）或 WireGuard VPN 访问，监控项在 Web UI 中配置。公开状态页只显示状态页内容，不暴露内部管理服务清单。
 
 ## 故障排查
 
@@ -198,13 +204,21 @@ docker network inspect proxy
 - SSL 证书过期或配置错误。
 - NPM 访问列表规则阻止了请求。
 
-### Tailscale 能 ping 但服务打不开
+### WireGuard 能 ping 但服务打不开
+
+```bash
+sudo wg show
+sudo firewall-cmd --list-all
+```
 
 常见原因：
 
 - 服务只监听 `127.0.0.1`。
 - 防火墙未放行对应端口。
 - 容器端口未映射到宿主机。
+- WireGuard 客户端 AllowedIPs 不包含目标子网。
+- 路由器端口转发未正确映射 51820/udp。
+- DDNS-Go 域名解析未更新（IP 变动后）。
 - 浏览器代理或 DNS 规则影响访问。
 
 ### Uptime Kuma 状态页误进后台
@@ -236,6 +250,7 @@ docker inspect reverse-nginx | grep -A 20 Mounts
 ## 相关文档
 
 - [双 Nginx 入口架构](dual-nginx-design.md)
+- [WireGuard + DDNS-Go 私有管理链路](wireguard-ddnsgo-design.md)
 - [README.md](../README.md)
 - [Nginx 示例配置](../examples/nginx/)
 - [Compose 示例](../examples/compose/)

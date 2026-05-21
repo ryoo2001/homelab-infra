@@ -17,10 +17,12 @@ flowchart TB
 
   subgraph Private["Private management"]
     remote[Remote admin device]
-    tailscale[Tailscale]
+    ddns[DDNS-Go dynamic endpoint]
+    router[Router port forwarding]
+    wireguard[WireGuard host-level]
     management[Management services]
   end
 
   internet --> cloudflare --> tunnel --> cloudflared --> reverse --> publicServices
   lan --> adguard --> npm --> internalServices
-  remote --> tailscale --> management
+  remote --> ddns --> router --> wireguard --> management
