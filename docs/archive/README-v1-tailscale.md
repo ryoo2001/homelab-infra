@@ -1,6 +1,8 @@
+> **归档说明**：本文为 Tailscale 时期的首页版本。私有管理链路已迁移至 WireGuard + DDNS-Go，当前首页见 [README.md](../../README.md)。
+
 # HomeLab Infrastructure
 
-基于 Docker、Nginx、Cloudflare Tunnel、WireGuard + DDNS-Go 和内网 DNS 的家庭服务器实验仓库。
+基于 Docker、Nginx、Cloudflare Tunnel、Tailscale 和内网 DNS 的家庭服务器实验仓库。
 
 ## 项目总览
 
@@ -12,7 +14,7 @@
 - 使用 Docker Compose 管理自托管服务。
 - 将公开访问、内网访问、私有管理三类链路分离。
 - 使用 Cloudflare Tunnel 避免家庭宽带直接开放 80/443 端口。
-- 使用 WireGuard + DDNS-Go 保护 SSH、Portainer、管理后台等高风险入口。
+- 使用 Tailscale 保护 SSH、Portainer、管理后台等高风险入口。
 - 使用 Uptime Kuma 建立基础服务可观测能力。
 
 ## 技术栈
@@ -23,7 +25,7 @@
 | 公网入口 | Cloudflare DNS, Cloudflare Tunnel, Cloudflare Access |
 | 反向代理 | Nginx, Nginx Proxy Manager |
 | 内网 DNS | AdGuard Home |
-| 私有远程管理 | WireGuard (host) + DDNS-Go (Docker) |
+| 私有远程管理 | Tailscale |
 | 监控 | Uptime Kuma |
 | 应用服务 | Halo, Homepage |
 
@@ -33,7 +35,7 @@
 | --- | --- | --- |
 | 公开访问 | `Internet -> Cloudflare -> Tunnel -> cloudflared -> reverse-nginx -> service` | Halo 前台、Uptime Kuma 状态页 |
 | 内网访问 | `LAN -> AdGuard Home -> Nginx Proxy Manager -> service` | Homepage、Kuma 后台、AdGuard 管理页 |
-| 私有管理 | `Remote device -> DDNS-Go -> router forwarding :51820/udp -> WireGuard -> service` | SSH、Portainer、系统维护入口 |
+| 私有管理 | `Remote device -> Tailscale -> home-server -> service` | SSH、Portainer、系统维护入口 |
 
 ## 架构图
 
@@ -61,10 +63,8 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  remote[Remote device] --> ddns[vpn.example.com DDNS-Go]
-  ddns --> router[Router :51820/udp]
-  router --> wg[WireGuard]
-  wg --> management[SSH / Portainer / NPM / AdGuard / Kuma]
+  remote[Remote device] --> tailscale[Tailscale]
+  tailscale --> management[SSH / Portainer / admin panels]
 ```
 
 ## 访问与安全边界
@@ -75,7 +75,7 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 | --- | --- | --- |
 | 公开访问 | 博客前台、公开状态页 | `yuuyan.top` 子域名 |
 | 认证访问 | 偶尔需要外部访问的入口 | Cloudflare Access |
-| 私有管理 | SSH、Portainer、AdGuard、NPM、后台面板 | LAN 或 WireGuard VPN |
+| 私有管理 | SSH、Portainer、AdGuard、NPM、后台面板 | LAN 或 Tailscale |
 
 公网只放低风险内容：
 
@@ -83,7 +83,7 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 - Uptime Kuma 只公开状态页，不公开控制台。
 - Homepage 如果展示内部服务清单，只放在内网入口。
 
-所有公网流量应先经过 Cloudflare，再通过 Tunnel 进入内网。家庭宽带侧只对外暴露 51820/udp（WireGuard）。WireGuard + DDNS-Go 用于 SSH、Portainer、NPM、AdGuard Home 和 Uptime Kuma 控制台这类私有管理入口。DDNS-Go 负责动态更新 WireGuard 端点域名，不作为公网服务暴露。
+所有公网流量应先经过 Cloudflare，再通过 Tunnel 进入内网。家庭宽带侧不直接开放 80/443。Tailscale 用于 SSH、Portainer、NPM、AdGuard Home 和 Uptime Kuma 控制台这类私有管理入口。
 
 ## 设计亮点
 
@@ -98,7 +98,6 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 | 路径 | 说明 |
 | --- | --- |
 | [docs/dual-nginx-design.md](docs/dual-nginx-design.md) | 为什么不用传统 DNS 分流，而是用两个 Nginx + proxy 网络 |
-| [docs/wireguard-ddnsgo-design.md](docs/wireguard-ddnsgo-design.md) | WireGuard + DDNS-Go 私有管理链路设计 |
 | [docs/operations-guide.md](docs/operations-guide.md) | 日常维护与故障排查 |
 | [examples/compose/](examples/compose/) | 脱敏后的 Compose 样例 |
 | [examples/nginx/](examples/nginx/) | 脱敏后的 Nginx 反代样例 |
@@ -113,16 +112,6 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 - [x] 两个 Nginx + proxy 网络设计整理。
 - [x] Docker `proxy` 网络隔离设计整理。
 - [x] 初始公开样例配置整理。
-- [x] 私有管理链路从 Tailscale 迁移至 WireGuard + DDNS-Go。
-
-待补充：
-
-- [ ] 脱敏截图和服务关系示意。
-- [ ] AdGuard Home DNS rewrite 实际维护经验。
-- [ ] 自动化备份策略。
-- [ ] 日志分析流程。
-- [ ] 服务升级与回滚流程。
-- [ ] 关键服务告警渠道。
 
 ## License
 

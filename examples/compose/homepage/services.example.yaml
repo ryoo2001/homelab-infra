@@ -47,10 +47,15 @@
         href: https://dash.cloudflare.com
         description: 隧道管理
 
-    - Tailscale:
-        icon: tailscale.png
-        href: https://login.tailscale.com/admin/machines
-        description: 远程私有网络
+    - WireGuard:
+        icon: wireguard.png
+        href: ""
+        description: 远程私有网络 VPN
+
+    - DDNS-Go:
+        icon: ddns-go.png
+        href: http://home.yuu.lan:9876
+        description: 动态域名解析
 
     - 原生 Nginx:
         icon: nginx.png

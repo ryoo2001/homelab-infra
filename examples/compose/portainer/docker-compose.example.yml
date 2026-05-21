@@ -4,7 +4,7 @@ services:
     container_name: portainer
     restart: unless-stopped
     ports:
-      # Access this port only from LAN or Tailscale in the real environment.
+      # Access this port only from LAN or WireGuard VPN in the real environment.
       - "9443:9443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

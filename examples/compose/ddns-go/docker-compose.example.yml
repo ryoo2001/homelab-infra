@@ -1,0 +1,21 @@
+services:
+  ddns-go:
+    image: jeessy/ddns-go:latest
+    container_name: ddns-go
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - TZ=Asia/Shanghai
+    volumes:
+      - /data/compose/ddns-go:/root
+    command:
+      - -l
+      - 0.0.0.0:9876
+      - -f
+      - "300"
+
+# Notes:
+# - host network mode is required for DDNS-Go to detect the public IP.
+# - Port 9876 is the Web UI. Do NOT forward this port on the router.
+# - Access the Web UI only from LAN or WireGuard VPN.
+# - The -f flag sets the DNS update interval in seconds.
