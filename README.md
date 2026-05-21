@@ -33,7 +33,7 @@
 | --- | --- | --- |
 | 公开访问 | `Internet -> Cloudflare -> Tunnel -> cloudflared -> reverse-nginx -> service` | Halo 前台、Uptime Kuma 状态页 |
 | 内网访问 | `LAN -> AdGuard Home -> Nginx Proxy Manager -> service` | Homepage、Kuma 后台、AdGuard 管理页 |
-| 私有管理 | `Remote device -> DDNS-Go -> router forwarding :51820/udp -> WireGuard -> service` | SSH、Portainer、系统维护入口 |
+| 私有管理 | `Remote device -> DDNS-Go -> router forwarding :51820/udp -> WireGuard -> service` | SSH、Portainer、全部管理面板（接入即获得 LAN 等价访问） |
 
 ## 架构图
 
@@ -90,6 +90,7 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 - 双 Nginx 入口：`reverse-nginx` 处理公网，NPM 处理内网，DNS 不承担分流主逻辑。
 - Docker `proxy` 网络只连接需要被入口层访问的容器，降低管理服务误暴露概率。
 - Uptime Kuma 状态页和后台控制台分开，公网只放低风险只读内容。
+- WireGuard 是 L3 网络层接入：客户端连接后路由至家庭 LAN 网段，管理服务不需要单独配置远程访问路径，新增服务自动可达。
 
 详细说明见 [为什么不用传统 DNS 分流，而是用两个 Nginx + proxy 网络](docs/dual-nginx-design.md)。
 

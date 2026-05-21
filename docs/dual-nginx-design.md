@@ -65,7 +65,7 @@ flowchart TB
 
 内网链路服务局域网设备，比如 Homepage、Kuma 后台和 AdGuard 管理页。AdGuard Home 只做名字解析和局域网入口落点，反代和站点维护交给 NPM。
 
-私有管理链路通过 WireGuard VPN 访问，不经过任何 Nginx 入口，适合 SSH、Portainer 和其他管理面板。
+私有管理链路通过 WireGuard VPN 接入，不经过任何 Nginx 入口。客户端连接后路由至家庭 LAN 网段，SSH、Portainer、NPM 后台、AdGuard 管理面等服务直接通过内网地址访问，不需要为每个服务单独配置访问路径。
 
 ### 职责边界
 
