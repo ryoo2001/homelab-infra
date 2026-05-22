@@ -17,8 +17,8 @@ flowchart TB
 
   subgraph Private["Private management"]
     remote[Remote admin device]
-    ddns[DDNS-Go dynamic endpoint]
-    router[Router port forwarding]
+    ddns[DDNS-Go A/AAAA]
+    router[IPv6 firewall / IPv4 forwarding]
     wireguard[WireGuard host-level]
     management[Management services]
   end

@@ -47,3 +47,13 @@ docs/wireguard-ddnsgo-deployment.md
 tmp/
 temp/
 *.tmp
+__pycache__/
+*.pyc*
+
+# Local Codex/Claude worktrees and diagnostics
+.claude/
+server-health-report.md
+tools/server_health_check.py
+
+# Gemini CLI
+GEMINI.md

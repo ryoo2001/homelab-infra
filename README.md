@@ -33,7 +33,7 @@
 | --- | --- | --- |
 | 公开访问 | `Internet -> Cloudflare -> Tunnel -> cloudflared -> reverse-nginx -> service` | Halo 前台、Uptime Kuma 状态页 |
 | 内网访问 | `LAN -> AdGuard Home -> Nginx Proxy Manager -> service` | Homepage、Kuma 后台、AdGuard 管理页 |
-| 私有管理 | `Remote device -> DDNS-Go -> router forwarding :51820/udp -> WireGuard -> service` | SSH、Portainer、全部管理面板（接入即获得 LAN 等价访问） |
+| 私有管理 | `Remote device -> DDNS-Go A/AAAA -> IPv6 firewall / IPv4 forwarding :51820/udp -> WireGuard -> service` | SSH、Portainer、全部管理面板（接入即获得 LAN 等价访问） |
 
 ## 架构图
 
@@ -61,8 +61,8 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-  remote[Remote device] --> ddns[vpn.example.com DDNS-Go]
-  ddns --> router[Router :51820/udp]
+  remote[Remote device] --> ddns[DDNS-Go A/AAAA]
+  ddns --> router[IPv6 firewall / IPv4 forwarding :51820/udp]
   router --> wg[WireGuard]
   wg --> management[SSH / Portainer / NPM / AdGuard / Kuma]
 ```
@@ -83,7 +83,7 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 - Uptime Kuma 只公开状态页，不公开控制台。
 - Homepage 如果展示内部服务清单，只放在内网入口。
 
-所有公网流量应先经过 Cloudflare，再通过 Tunnel 进入内网。家庭宽带侧只对外暴露 51820/udp（WireGuard）。WireGuard + DDNS-Go 用于 SSH、Portainer、NPM、AdGuard Home 和 Uptime Kuma 控制台这类私有管理入口。DDNS-Go 负责动态更新 WireGuard 端点域名，不作为公网服务暴露。
+所有公网 Web 流量应先经过 Cloudflare，再通过 Tunnel 进入内网。家庭宽带侧只对外暴露 51820/udp（WireGuard），并保留 IPv6 优先、IPv4 fallback 的接入方式。WireGuard + DDNS-Go 用于 SSH、Portainer、NPM、AdGuard Home 和 Uptime Kuma 控制台这类私有管理入口。DDNS-Go 负责动态更新 WireGuard 端点域名，不作为公网服务暴露。
 
 ## 设计亮点
 
