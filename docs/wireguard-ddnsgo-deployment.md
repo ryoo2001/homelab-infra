@@ -430,32 +430,9 @@ PersistentKeepalive = 25
 
 除非明确需要全局流量回家。
 
-## Clash / Mihomo fake-ip 问题
+## 代理和 DNS 注意事项
 
-客户端曾出现握手失败，日志类似：
-
-```text
-Sending handshake initiation to peer 1 (198.18.0.38:51820)
-Handshake did not complete after 5 seconds
-```
-
-`198.18.0.0/15` 是保留网段，常见于 Clash / Mihomo 的 fake-ip DNS。说明 WireGuard Endpoint 域名被解析成了代理假 IP。
-
-处理：
-
-1. 临时把客户端 `Endpoint` 改成真实公网 IP 验证。
-2. 在 Clash / Mihomo 中给 DDNS 域名加直连规则。
-3. 如果使用 fake-ip，给 DDNS 域名加入 fake-ip 过滤。
-
-示例：
-
-```yaml
-rules:
-  - DOMAIN,vpn.yuuyan.top,DIRECT
-
-fake-ip-filter:
-  - vpn.yuuyan.top
-```
+如果客户端同时使用 Clash / Mihomo，需确认 WireGuard Endpoint 域名不会被 fake-ip 或代理规则改写。排查方法见[运维指南 · WireGuard Endpoint 被 Clash / Mihomo fake-ip 影响](operations-guide.md#wireguard-endpoint-被-clash--mihomo-fake-ip-影响)。
 
 ## 验证流程
 

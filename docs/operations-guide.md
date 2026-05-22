@@ -221,6 +221,33 @@ sudo firewall-cmd --list-all
 - DDNS-Go 域名解析未更新（IP 变动后）。
 - 浏览器代理或 DNS 规则影响访问。
 
+### WireGuard Endpoint 被 Clash / Mihomo fake-ip 影响
+
+客户端日志可能出现：
+
+```text
+Sending handshake initiation to peer 1 (198.18.0.38:51820)
+Handshake did not complete after 5 seconds
+```
+
+`198.18.0.0/15` 是保留网段，常见于 Clash / Mihomo 的 fake-ip DNS。出现这种地址通常说明 WireGuard Endpoint 域名被解析成了代理假 IP，而不是家庭宽带的真实公网地址。
+
+处理：
+
+1. 临时把客户端 `Endpoint` 改成真实公网 IP，确认 WireGuard 本身可连。
+2. 在 Clash / Mihomo 中给 DDNS 域名加直连规则。
+3. 如果使用 fake-ip，给 DDNS 域名加入 fake-ip 过滤。
+
+示例：
+
+```yaml
+rules:
+  - DOMAIN,vpn.yuuyan.top,DIRECT
+
+fake-ip-filter:
+  - vpn.yuuyan.top
+```
+
 ### Uptime Kuma 状态页误进后台
 
 公网 Nginx 只允许状态页路径：
