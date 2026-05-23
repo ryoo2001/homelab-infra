@@ -55,5 +55,13 @@ __pycache__/
 server-health-report.md
 tools/server_health_check.py
 
+# MCP server local artifacts
+/mcp/node_modules/
+/mcp/dist/
+/mcp/.env
+/mcp/.env.*
+!/mcp/.env.example
+/mcp/*.tsbuildinfo
+
 # Gemini CLI
 GEMINI.md

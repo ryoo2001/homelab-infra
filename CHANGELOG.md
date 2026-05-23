@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-05-22
+
+- MCP 运维服务重构与优化：
+  - 拆分 1660 行单文件为 9 个模块（config, helpers, ssh, tools/*），职责清晰。
+  - 新增 `runBatch()` 合并多次 SSH 调用，7 个工具从 24 次 → 7 次握手。
+  - 新增 `readonlyTool` / `destructiveTool` 注册 helper，消除 ~150 行样板代码。
+  - 新增 SSH 输出 1MB 限制，防止内存溢出。
+  - 新增 destructive 操作审计日志（`mcp/audit.log`）。
+  - 新增可选白名单配置（`ALLOWED_SERVICES` / `ALLOWED_COMPOSE_PROJECTS`）。
+  - 更新 `.env.example`，注释 `SSH_PASSWORD`，添加安全说明。
+  - 更新 `mcp/README.md` 和 `docs/mcp-ops-account.md`，反映最新功能。
+
 ## 2026-05-21
 
 - 私有管理链路从 Tailscale 迁移到 WireGuard (host-level) + DDNS-Go (Docker)。
