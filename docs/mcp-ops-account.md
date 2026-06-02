@@ -149,17 +149,12 @@ Match User mcpops
 
 MCP 运维服务对 SSH 命令输出设置 1MB 限制以防止内存溢出。所有 destructive 操作自动写入 `mcp/audit.log`。可选的 `ALLOWED_SERVICES` 和 `ALLOWED_COMPOSE_PROJECTS` 环境变量进一步限制操作范围。SSH 认证优先使用密钥，密码作为备选。OpenClaw 路径、服务名、环境变量和 CLI 参数经过 schema 校验，工具只调用 `openclaw` CLI 或 Compose sidecar。
 
-## 对应仓库文件
+## 相关文档
 
 - [mcp/README.md](../mcp/README.md)
+- [个人运维助手设计](../mcp/docs/personal-ops-assistant.md)
 - [README.md](../README.md)
 
-## 不要追踪上传的文件
+## 不要追踪的本地文件
 
-这些本地文件应保留在机器上，不进仓库：
-
-- `mcp/.env`
-- `mcp/node_modules/`
-- `mcp/dist/`
-- `mcp/audit.log`
-- 任何 SSH 私钥
+详见 [mcp/README.md · 不要提交的本地文件](../mcp/README.md#不要提交的本地文件)。

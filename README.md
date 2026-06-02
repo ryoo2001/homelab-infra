@@ -102,9 +102,12 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 | --- | --- |
 | [docs/dual-nginx-design.md](docs/dual-nginx-design.md) | 为什么不用传统 DNS 分流，而是用两个 Nginx + proxy 网络 |
 | [docs/wireguard-ddnsgo-design.md](docs/wireguard-ddnsgo-design.md) | WireGuard + DDNS-Go 私有管理链路设计 |
+| [docs/wireguard-ddnsgo-deployment.md](docs/wireguard-ddnsgo-deployment.md) | WireGuard + DDNS-Go 部署记录 |
 | [docs/mcp-ops-account.md](docs/mcp-ops-account.md) | MCP 运维专用账号方案 |
 | [docs/operations-guide.md](docs/operations-guide.md) | 日常维护与故障排查 |
 | [mcp/README.md](mcp/README.md) | HomeLab MCP 运维服务说明 |
+| [mcp/docs/personal-ops-assistant.md](mcp/docs/personal-ops-assistant.md) | MCP 个人运维助手设计 |
+| [CHANGELOG.md](CHANGELOG.md) | 版本变更记录 |
 | [examples/compose/](examples/compose/) | 脱敏后的 Compose 样例 |
 | [examples/nginx/](examples/nginx/) | 脱敏后的 Nginx 反代样例 |
 | [examples/dns/](examples/dns/) | 内网 DNS rewrite 样例 |
@@ -113,13 +116,13 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 
 已完成：
 
-- [x] HomeLab 总体架构整理。
+- [x] HomeLab 总体架构文档。
 - [x] 公网、内网、私有管理三条链路拆分。
-- [x] 两个 Nginx + proxy 网络设计整理。
-- [x] Docker `proxy` 网络隔离设计整理。
-- [x] 初始公开样例配置整理。
+- [x] 双 Nginx + proxy 网络设计。
+- [x] Docker `proxy` 网络隔离设计。
+- [x] 公开样例配置。
 - [x] 私有管理链路从 Tailscale 迁移至 WireGuard + DDNS-Go。
-- [x] MCP 运维服务（homolab-mcp-ops）：SSH 诊断、systemd 管理、Docker/Compose 操作、OpenClaw 部署和运行状态管理。
+- [x] MCP 运维服务：SSH 诊断、systemd 管理、Docker/Compose 操作、OpenClaw 管理。
 
 待补充：
 

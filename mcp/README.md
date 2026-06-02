@@ -133,3 +133,9 @@ Portainer 管理 Compose stack 时，`/data/compose` 可能只有 `1`、`2`、`3
 - `mcp/node_modules/`
 - `mcp/audit.log`
 - 任何本机私钥文件
+
+## 相关文档
+
+- [个人运维助手设计](docs/personal-ops-assistant.md)
+- [MCP 运维账号方案](../docs/mcp-ops-account.md)
+- [README.md](../README.md)

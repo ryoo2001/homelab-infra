@@ -1,5 +1,7 @@
 # Changelog
 
+[← 返回 README](README.md)
+
 ## 2026-06-02
 
 - MCP 运维服务新增 OpenClaw 管理能力：
