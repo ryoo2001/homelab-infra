@@ -69,3 +69,9 @@
 - SSH 认证：专用运维账号 + `sudo` 白名单
 - 审计：把重启类操作写入本地日志或外部日志系统
 - OpenClaw：本机 CLI 用 `OPENCLAW_CLI_PATH`，Compose 部署用 `OPENCLAW_COMPOSE_DIR`、`OPENCLAW_CLI_SERVICE` 和 `OPENCLAW_GATEWAY_SERVICE`
+
+## 相关文档
+
+- [MCP 运维服务说明](../README.md)
+- [MCP 运维账号方案](../../docs/mcp-ops-account.md)
+- [README.md](../../README.md)
