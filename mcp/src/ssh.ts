@@ -41,10 +41,13 @@ export function createSshExecutor(config: AppConfig): SshExecutor {
       readyTimeout: config.sshConnectTimeoutMs
     };
     if (config.sshPassword) {
-      connection.password = config.sshPassword;
+      connection.password = target.sshPassword ?? config.sshPassword;
+    } else if (target.sshPassword) {
+      connection.password = target.sshPassword;
     }
-    if (config.sshKeyPath) {
-      connection.privateKey = await readFile(config.sshKeyPath);
+    const sshKeyPath = target.sshKeyPath ?? config.sshKeyPath;
+    if (sshKeyPath) {
+      connection.privateKey = await readFile(sshKeyPath);
     }
     return connection;
   }

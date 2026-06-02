@@ -88,17 +88,23 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { z } from "zod";
 import { appendFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 type ToolHandler = (args: any) => Promise<{ content: { type: "text"; text: string }[] }>;
 
-const AUDIT_LOG_PATH = path.join(process.cwd(), "mcp", "audit.log");
+const moduleDir = path.dirname(fileURLToPath(import.meta.url));
+const mcpRoot = path.basename(moduleDir) === "src" || path.basename(moduleDir) === "dist"
+  ? path.resolve(moduleDir, "..")
+  : process.cwd();
+const AUDIT_LOG_PATH = process.env.MCP_AUDIT_LOG_PATH ?? path.join(mcpRoot, "audit.log");
 
 async function logDestructiveAction(toolName: string, args: any): Promise<void> {
   const timestamp = new Date().toISOString();
+  const scrubbedArgs = scrubSensitiveValues(args);
   const entry = JSON.stringify({
     timestamp,
     tool: toolName,
-    args,
+    args: scrubbedArgs,
     pid: process.pid
   });
   try {
@@ -106,6 +112,40 @@ async function logDestructiveAction(toolName: string, args: any): Promise<void> 
   } catch (error) {
     console.error(`Failed to write audit log: ${error}`);
   }
+}
+
+function scrubSensitiveValues(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item, index) => {
+      const previous = value[index - 1];
+      if (typeof previous === "string" && isSensitiveKey(previous)) {
+        return "[redacted]";
+      }
+      if (typeof item === "string" && isSensitiveAssignment(item)) {
+        return item.replace(/=.*/, "=[redacted]");
+      }
+      return scrubSensitiveValues(item);
+    });
+  }
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+  return Object.fromEntries(
+    Object.entries(value).map(([key, item]) => [
+      key,
+      isSensitiveKey(key)
+        ? "[redacted]"
+        : scrubSensitiveValues(item)
+    ])
+  );
+}
+
+function isSensitiveKey(value: string): boolean {
+  return /token|password|secret|credential|api.?key|access.?key|private.?key/i.test(value);
+}
+
+function isSensitiveAssignment(value: string): boolean {
+  return /token|password|secret|credential|private.?key/i.test(value) && value.includes("=");
 }
 
 export function readonlyTool(

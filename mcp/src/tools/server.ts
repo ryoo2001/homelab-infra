@@ -44,7 +44,15 @@ export function registerServerTools({ server, config, ssh, assertAllowedHost }: 
     "Return the configured Linux hosts that this MCP server is allowed to manage.",
     {},
     async () => ({
-      content: jsonText(config.hosts)
+      content: jsonText(
+        config.hosts.map((host) => ({
+          id: host.id,
+          host: host.host,
+          ...(host.credentialId ? { credentialId: host.credentialId } : {}),
+          ...(host.user ? { user: host.user } : {}),
+          ...(host.port ? { port: host.port } : {})
+        }))
+      )
     })
   );
 

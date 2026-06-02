@@ -8,6 +8,7 @@ import { registerServerTools } from "./tools/server.js";
 import { registerSystemdTools } from "./tools/systemd.js";
 import { registerDockerTools } from "./tools/docker.js";
 import { registerComposeTools } from "./tools/compose.js";
+import { registerOpenClawTools } from "./tools/openclaw.js";
 
 const config = loadConfig();
 const ssh = createSshExecutor(config);
@@ -24,6 +25,7 @@ registerServerTools(deps);
 registerSystemdTools(deps);
 registerDockerTools(deps);
 registerComposeTools(deps);
+registerOpenClawTools(deps);
 
 async function main() {
   const transport = new StdioServerTransport();

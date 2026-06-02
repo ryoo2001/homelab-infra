@@ -62,6 +62,7 @@ tools/server_health_check.py
 /mcp/.env.*
 !/mcp/.env.example
 /mcp/*.tsbuildinfo
+/mcp/lobehub-mcp-config.json
 
 # Gemini CLI
 GEMINI.md

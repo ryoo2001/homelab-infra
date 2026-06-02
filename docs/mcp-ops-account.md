@@ -4,10 +4,9 @@
 
 ## 目标
 
-- 只允许 MCP 访问需要的主机
-- 只允许读取日志、状态和少量重启/管理动作
-- 将权限收敛到一个专用账号
-- 优先使用密钥登录，密码作为备选
+- 限定 MCP 访问范围至白名单主机和服务
+- 将权限收敛到专用账号，密钥登录优先，密码作为备选
+- 限制可执行操作为日志读取、状态查询和受控的重启/管理动作
 
 ## 推荐账号
 
@@ -19,12 +18,14 @@
 - 读取 systemd 日志
 - 重启白名单里的 systemd 服务
 - 读取 Docker / Compose 状态
+- 通过 `openclaw` CLI 或 OpenClaw Compose sidecar 管理 OpenClaw
 
 ### 不做的事
 
 - 不作为个人日常 shell 账号
 - 不授予完整 sudo
 - 不开放任意命令执行
+- 不把 OpenClaw 管理能力扩展成通用 shell 跳板
 
 ## 创建方式
 
@@ -116,6 +117,21 @@ Docker 相关工具需要远端账号能访问 Docker socket，常见做法是�
 sudo usermod -aG docker mcpops
 ```
 
+### OpenClaw
+
+OpenClaw 工具有两种常用授权方式：
+
+- 本机 CLI 模式：远端账号能执行 `openclaw`，并能读取 OpenClaw 配置、状态、日志和 gateway 信息。
+- Docker Compose 模式：远端账号能进入 `OPENCLAW_COMPOSE_DIR`，并能执行 `docker compose run --rm -T openclaw-cli ...` 和 gateway lifecycle 相关 Compose 命令。
+
+如果 OpenClaw gateway 由 systemd 管理，可以在 sudoers 中只放行对应服务，例如：
+
+```sudoers
+mcpops ALL=(root) NOPASSWD: /bin/systemctl start openclaw-gateway, /bin/systemctl stop openclaw-gateway, /bin/systemctl restart openclaw-gateway, /bin/systemctl status openclaw-gateway
+```
+
+如果 OpenClaw 由 Docker Compose 管理，推荐优先使用 `docker` 组或受限 Docker sudoers，而不是授予完整 sudo。`openclaw_cli` 只会执行 OpenClaw CLI 或 Compose CLI sidecar；但它仍属于高权限入口，因为 OpenClaw 子命令可能修改配置、设备、插件、任务或 gateway 状态。
+
 ## SSH 限制
 
 建议只允许这个账号从 LAN 或 WireGuard 登录。
@@ -131,12 +147,7 @@ Match User mcpops
 
 ## 安全特性
 
-MCP 运维服务内置以下安全机制：
-
-- **输出限制**：SSH 命令输出限制 1MB，防止内存溢出
-- **审计日志**：所有 destructive 操作自动记录到 `mcp/audit.log`
-- **白名单控制**：可选的 `ALLOWED_SERVICES` 和 `ALLOWED_COMPOSE_PROJECTS` 环境变量
-- **密钥优先**：优先使用 SSH 密钥认证，密码作为备选
+MCP 运维服务对 SSH 命令输出设置 1MB 限制以防止内存溢出。所有 destructive 操作自动写入 `mcp/audit.log`。可选的 `ALLOWED_SERVICES` 和 `ALLOWED_COMPOSE_PROJECTS` 环境变量进一步限制操作范围。SSH 认证优先使用密钥，密码作为备选。OpenClaw 路径、服务名、环境变量和 CLI 参数经过 schema 校验，工具只调用 `openclaw` CLI 或 Compose sidecar。
 
 ## 对应仓库文件
 
@@ -152,4 +163,3 @@ MCP 运维服务内置以下安全机制：
 - `mcp/dist/`
 - `mcp/audit.log`
 - 任何 SSH 私钥
-

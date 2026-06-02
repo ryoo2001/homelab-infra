@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-06-02
+
+- MCP 运维服务新增 OpenClaw 管理能力：
+  - 部署发现、Gateway 探测、日志、doctor、升级、设备审批和 CLI 管理工具。
+  - 通道、模型、Agent、会话、任务、安全审计、插件、记忆和 OpenClaw 内部 MCP 配置查询工具。
+  - 在 `README.md`、`mcp/README.md`、`docs/mcp-ops-account.md` 和 `mcp/docs/personal-ops-assistant.md` 中明确 OpenClaw 权限边界和 destructive 操作范围。
+
 ## 2026-05-22
 
 - MCP 运维服务重构与优化：
