@@ -63,9 +63,10 @@ flowchart LR
 ```mermaid
 flowchart LR
   remote[Remote device] --> ddns[DDNS-Go A/AAAA]
-  ddns --> router[IPv6 firewall / IPv4 forwarding :51820/udp]
+  ddns --> router[router :51820/udp]
   router --> wg[WireGuard]
-  wg --> management[SSH / Portainer / NPM / AdGuard / Kuma]
+  wg -->|路由至 192.168.31.0/24| lan[家庭 LAN]
+  lan --> ssh[sshd] & portainer[Portainer] & npm[NPM] & adguard[AdGuard] & kuma[Kuma]
 ```
 
 ## 访问与安全边界
