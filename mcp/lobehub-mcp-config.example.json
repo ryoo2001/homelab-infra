@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "homolab-ops": {
+      "command": "node",
+      "args": ["D:/homolab/mcp/dist/index.js"],
+      "type": "stdio",
+      "env": {
+        "ALLOWED_HOSTS": "homolab=192.168.1.100@homolab,server-jp=203.0.113.10@jp-root",
+        "SSH_CREDENTIALS": "homolab,jp-root",
+        "SSH_PORT": "22",
+        "CRED_HOMOLAB_USER": "mcpops",
+        "CRED_HOMOLAB_SSH_PASSWORD": "your-password-here",
+        "CRED_HOMOLAB_SUDO_PASSWORD": "your-sudo-password-here",
+        "CRED_JP_ROOT_USER": "root",
+        "CRED_JP_ROOT_SSH_PASSWORD": "your-password-here",
+        "COMPOSE_ROOT": "/data/compose",
+        "OPENCLAW_CLI_PATH": "openclaw",
+        "OPENCLAW_CLI_SERVICE": "openclaw-cli",
+        "OPENCLAW_GATEWAY_SERVICE": "openclaw-gateway",
+        "OPENCLAW_GATEWAY_CONTAINER": "openclaw-gateway",
+        "OPENCLAW_GATEWAY_URL": "ws://127.0.0.1:18789"
+      }
+    }
+  }
+}
