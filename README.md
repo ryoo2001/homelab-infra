@@ -26,7 +26,7 @@
 | 私有远程管理 | WireGuard (host) + DDNS-Go (Docker) |
 | 监控 | Uptime Kuma |
 | 应用服务 | Halo, Homepage |
-| 运维工具集成 | Model Context Protocol (MCP), ssh2, OpenClaw |
+| 运维工具集成 | Model Context Protocol (MCP), ssh2, 1Panel API, OpenClaw |
 
 ## 三条访问链路
 
@@ -92,7 +92,7 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 - Docker 网络按链路拆分：`public_proxy`（外网入口层）和 `internal_proxy`（内网入口层），降低管理服务误暴露概率。
 - Uptime Kuma 状态页和后台控制台分开，公网只放低风险只读内容。
 - WireGuard 是 L3 网络层接入：客户端连接后路由至家庭 LAN 网段，管理服务不需要单独配置远程访问路径，新增服务自动可达。
-- MCP 运维工具：通过 SSH 和 OpenClaw CLI 提供主机诊断、容器管理和 OpenClaw 部署管理能力，限定白名单主机和服务，不开放任意 shell 执行。
+- MCP 运维工具：通过 SSH、1Panel V2 API 和 OpenClaw CLI 提供主机诊断、容器/面板查询和 OpenClaw 部署管理能力，限定白名单主机和服务，不开放任意 shell 执行。
 
 详细说明见 [双入口架构设计](docs/dual-nginx-design.md)。
 
@@ -122,7 +122,7 @@ HomeLab 的安全目标是减少公网暴露面。不同风险等级的服务放
 - [x] 公开样例配置。
 - [x] 私有管理链路从 Tailscale 迁移至 WireGuard + DDNS-Go。
 - [x] 外网入口从原生 Nginx 迁移至 1Panel OpenResty，Docker 管理统一到 1Panel。
-- [x] MCP 运维服务：SSH 诊断、systemd 管理、Docker/Compose 操作、OpenClaw 管理。
+- [x] MCP 运维服务：SSH 诊断、systemd 管理、Docker/Compose 操作、1Panel API 查询、OpenClaw 管理。
 
 待补充：
 

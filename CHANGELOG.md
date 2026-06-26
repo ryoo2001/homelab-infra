@@ -12,6 +12,14 @@
 - 修复 `blog.yuuyan.top` 启用1Panel 证书后的重定向循环（HTTPS 策略改为 `HTTPAlso`）。
 - 内网域名（`*.yuu.lan`）暂停启用，内网服务改以 IP 直接访问。
 - 更新 README、dual-nginx-design.md、operations-guide.md 反映迁移后架构。
+- MCP 运维服务新增 1Panel V2 API 支持：
+  - 新增 `onepanel_apps_list`、`onepanel_websites_list`、`onepanel_device_base` 和受限 `onepanel_api` 只读工具。
+  - 使用 1Panel V2 签名头 `1Panel-Token` / `1Panel-Timestamp`，默认 API 前缀为 `/api/v2`。
+  - 更新 `.env.example`、`mcp/README.md` 和 MCP 配置文档，说明 `ONEPANEL_URL`、`ONEPANEL_API_PREFIX`、`ONEPANEL_API_KEY`。
+- MCP 运维诊断增强：
+  - 新增 `server_exposure_audit` 端口暴露审计工具。
+  - 新增 `journal_error_summary` 按 unit 汇总 journal 错误工具。
+  - 调整 Portainer/1Panel label fallback 下的 `compose_update`，拉取镜像后停止并删除匹配容器，提示通过面板或 `compose_up` 重新拉起。
 
 ## 2026-06-02
 

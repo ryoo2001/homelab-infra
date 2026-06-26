@@ -18,6 +18,7 @@
 - 读取 systemd 日志
 - 重启白名单里的 systemd 服务
 - 读取 Docker / Compose 状态
+- 通过 1Panel V2 API Key 查询面板中的应用和网站状态
 - 通过 `openclaw` CLI 或 OpenClaw Compose sidecar 管理 OpenClaw
 
 ### 不做的事
@@ -25,6 +26,7 @@
 - 不作为个人日常 shell 账号
 - 不授予完整 sudo
 - 不开放任意命令执行
+- 不复用 1Panel Web 登录会话
 - 不把 OpenClaw 管理能力扩展成通用 shell 跳板
 
 ## 创建方式
@@ -132,6 +134,12 @@ mcpops ALL=(root) NOPASSWD: /bin/systemctl start openclaw-gateway, /bin/systemct
 
 如果 OpenClaw 由 Docker Compose 管理，推荐优先使用 `docker` 组或受限 Docker sudoers，而不是授予完整 sudo。`openclaw_cli` 只会执行 OpenClaw CLI 或 Compose CLI sidecar；但它仍属于高权限入口，因为 OpenClaw 子命令可能修改配置、设备、插件、任务或 gateway 状态。
 
+### 1Panel API
+
+1Panel API 工具不需要额外 sudoers。它们通过 SSH 在目标主机上调用 `ONEPANEL_URL`，并使用 `ONEPANEL_API_KEY` 生成 1Panel V2 要求的 `1Panel-Token` 和 `1Panel-Timestamp` 请求头。
+
+建议为 MCP 单独生成 API Key，并只把真实值放在本地 `mcp/.env` 或生产环境变量中，不提交到仓库。当前封装的 1Panel 专用工具以只读查询为主；`onepanel_api` 是受限原始入口，只允许 `GET` 或已确认只读的白名单 `POST` 路径，调用前仍应确认端点语义。
+
 ## SSH 限制
 
 建议只允许这个账号从 LAN 或 WireGuard 登录。
@@ -147,7 +155,7 @@ Match User mcpops
 
 ## 安全特性
 
-MCP 运维服务对 SSH 命令输出设置 1MB 限制以防止内存溢出。所有 destructive 操作自动写入 `mcp/audit.log`。可选的 `ALLOWED_SERVICES` 和 `ALLOWED_COMPOSE_PROJECTS` 环境变量进一步限制操作范围。SSH 认证优先使用密钥，密码作为备选。OpenClaw 路径、服务名、环境变量和 CLI 参数经过 schema 校验，工具只调用 `openclaw` CLI 或 Compose sidecar。
+MCP 运维服务对 SSH 命令输出设置 1MB 限制以防止内存溢出。所有 destructive 操作自动写入 `mcp/audit.log`。可选的 `ALLOWED_SERVICES` 和 `ALLOWED_COMPOSE_PROJECTS` 环境变量进一步限制操作范围。SSH 认证优先使用密钥，密码作为备选。1Panel API 路径、OpenClaw 路径、服务名、环境变量和 CLI 参数经过 schema 校验，工具只调用 1Panel API、`openclaw` CLI 或 Compose sidecar。
 
 ## 相关文档
 

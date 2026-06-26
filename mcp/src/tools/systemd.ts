@@ -207,4 +207,52 @@ export function registerSystemdTools({ server, config, ssh, assertAllowedHost }:
       };
     }
   );
+
+  readonlyTool(
+    server,
+    "journal_error_summary",
+    "Summarize journal errors by unit",
+    "Parse recent journal errors and summarize top units with error counts and sample messages.",
+    {
+      hostId: z.string(),
+      since: z.string().default("24 hours ago"),
+      limit: z.number().int().positive().max(50).default(10)
+    },
+    async ({ hostId, since, limit }) => {
+      const host = assertAllowedHost(hostId);
+      // Fetch JSONL output; each line is one journal entry
+      const result = await ssh.runSsh(
+        host,
+        `journalctl -p err..alert --since ${shellQuote(since)} -n 2000 --no-pager -o json 2>/dev/null || journalctl -p err..alert --since ${shellQuote(since)} -n 2000 --no-pager -o short-iso`
+      );
+      const units = new Map<string, { count: number; samples: string[] }>();
+      for (const line of parseLines(result.stdout)) {
+        try {
+          const entry = JSON.parse(line) as Record<string, unknown>;
+          const unit = (entry["_SYSTEMD_UNIT"] ?? entry["SYSLOG_IDENTIFIER"] ?? "unknown") as string;
+          const msg = String(entry["MESSAGE"] ?? "").slice(0, 120);
+          const rec = units.get(unit) ?? { count: 0, samples: [] };
+          rec.count++;
+          if (rec.samples.length < 3) rec.samples.push(msg);
+          units.set(unit, rec);
+        } catch {
+          // non-JSON fallback line — skip grouping
+        }
+      }
+      const grouped = Array.from(units.entries())
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, limit)
+        .map(([unit, { count, samples }]) => ({ unit, count, samples }));
+      return {
+        content: jsonText({
+          host: host.host,
+          since,
+          topUnits: grouped.length > 0 ? grouped : undefined,
+          raw: grouped.length === 0 ? result.stdout.trim() : undefined,
+          stderr: result.stderr.trim(),
+          code: result.code
+        })
+      };
+    }
+  );
 }

@@ -37,8 +37,21 @@ cp mcp/.env.example mcp/.env
 - [ ] SSH 优先使用密钥认证，密码仅作备选
 - [ ] 主机白名单已正确配置（`ALLOWED_HOSTS`）
 - [ ] 可选白名单已设置（`ALLOWED_SERVICES`、`ALLOWED_COMPOSE_PROJECTS`）
+- [ ] 1Panel API 已配置 V2 前缀（`ONEPANEL_API_PREFIX=/api/v2`）并使用单独 API Key
 - [ ] sudoers 已配置最小权限
 - [ ] 审计日志权限仅限所有者读写
+
+## 1Panel API 配置
+
+1Panel V2 API 通过以下环境变量配置：
+
+```ini
+ONEPANEL_URL=http://localhost:4444
+ONEPANEL_API_PREFIX=/api/v2
+ONEPANEL_API_KEY=replace-with-1panel-api-key
+```
+
+MCP 工具会在目标主机上通过 SSH 调用 `ONEPANEL_URL`，因此该地址可以是目标主机本机可访问的面板地址。API Key 不直接作为 token 发送，而是按 1Panel V2 要求生成 `1Panel-Token` 和 `1Panel-Timestamp` 请求头。
 
 ## 配置方式对比
 
@@ -90,6 +103,19 @@ dotenv -f mcp/.env list
 
 # 验证 JSON 配置
 jq empty mcp/lobehub-mcp-config.json
+```
+
+### 1Panel API 验证
+
+```bash
+# 通过 MCP 工具验证已安装应用和网站列表
+onepanel_apps_list hostId=homolab pageSize=5
+onepanel_websites_list hostId=homolab pageSize=5
+onepanel_device_base hostId=homolab
+
+# 验证原始 V2 端点，path 会自动拼接到 ONEPANEL_API_PREFIX 后面。
+# POST 仅允许已确认只读的白名单路径。
+onepanel_api hostId=homolab method=POST path=/toolbox/device/base body={}
 ```
 
 ## 参考文档

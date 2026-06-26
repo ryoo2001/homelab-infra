@@ -37,6 +37,9 @@ export type AppConfig = {
   hosts: HostConfig[];
   allowedServices: string[];
   allowedComposeProjects: string[];
+  onePanelUrl: string;
+  onePanelApiPrefix: string;
+  onePanelApiKey?: string;
 };
 
 function env(name: string, fallback?: string): string | undefined {
@@ -55,6 +58,11 @@ function parseList(value?: string): string[] {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
+}
+
+function normalizePathPrefix(value: string): string {
+  const trimmed = value.trim().replace(/^\/+/, "").replace(/\/+$/, "");
+  return trimmed ? `/${trimmed}` : "";
 }
 
 function envPrefix(kind: string, id: string): string {
@@ -134,7 +142,10 @@ export function loadConfig(): AppConfig {
     credentials,
     hosts,
     allowedServices: parseList(env("ALLOWED_SERVICES")),
-    allowedComposeProjects: parseList(env("ALLOWED_COMPOSE_PROJECTS"))
+    allowedComposeProjects: parseList(env("ALLOWED_COMPOSE_PROJECTS")),
+    onePanelUrl: env("ONEPANEL_URL", "http://localhost:4444") ?? "http://localhost:4444",
+    onePanelApiPrefix: normalizePathPrefix(env("ONEPANEL_API_PREFIX", "/api/v2") ?? "/api/v2"),
+    onePanelApiKey: env("ONEPANEL_API_KEY")
   };
 }
 

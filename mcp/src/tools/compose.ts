@@ -558,7 +558,12 @@ export function registerComposeTools({ server, config, ssh, assertAllowedHost }:
                 .map(shellQuote)
                 .join(" ")} --format '{{.Names}}')`,
               'if [ -z "$containers" ]; then echo "No containers matched compose project labels." >&2; exit 1; fi',
-              'docker run --rm -e DOCKER_API_VERSION=1.40 -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower:latest --run-once --cleanup $containers'
+              `images=$(docker ps -a ${dockerLabelFilter(resolved)
+                .map(shellQuote)
+                .join(" ")} --format '{{.Image}}' | sort -u)`,
+              'for image in $images; do docker pull "$image"; done',
+              'for container in $containers; do docker stop "$container" && docker rm "$container"; done',
+              'echo "Stopped and removed matched containers. Restart via 1Panel or re-run compose_up."'
             ].join("; "),
             900000
           );

@@ -463,4 +463,37 @@ fi
       };
     }
   );
+
+  readonlyTool(
+    server,
+    "server_exposure_audit",
+    "Audit port exposure",
+    "Inspect listening ports and firewall rules to surface unexpected public exposure risks.",
+    { hostId: z.string() },
+    async ({ hostId }) => {
+      const host = assertAllowedHost(hostId);
+      const batch = await ssh.runBatch(host, [
+        { name: "listening", command: "ss -tulpn 2>/dev/null" },
+        { name: "firewall", command: "sudo -n -- firewall-cmd --list-all 2>/dev/null || iptables -L INPUT -n 2>/dev/null || echo 'no firewall tool available'" },
+        { name: "public_ip", command: "ip -4 addr show scope global | grep -oP '(?<=inet )\\d+\\.\\d+\\.\\d+\\.\\d+' | head -5" }
+      ]);
+      // Parse listening ports into structured form
+      const ports = parseLines(batch.outputs.listening)
+        .filter(line => /LISTEN/.test(line) || /UNCONN/.test(line))
+        .map(line => {
+          const cols = line.split(/\s+/);
+          return { proto: cols[0], local: cols[4] ?? "", process: cols[6] ?? "" };
+        });
+      return {
+        content: jsonText({
+          host: host.host,
+          publicIPs: parseLines(batch.outputs.public_ip),
+          listeningPorts: ports,
+          firewallRules: batch.outputs.firewall.trim(),
+          stderr: batch.stderr.trim(),
+          code: batch.code
+        })
+      };
+    }
+  );
 }

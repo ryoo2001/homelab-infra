@@ -9,6 +9,7 @@
 - **日志查询**：journal 日志、failed units、systemd timers、错误日志
 - **Docker 管理**：容器、镜像、网络、卷、日志、统计信息、生命周期控制
 - **Docker Compose**：项目发现、配置校验、状态、日志、拉取、启动、停止、更新
+- **1Panel API**：通过 1Panel V2 API 查询已安装应用、网站和受限原始 API
 - **OpenClaw 管理**：部署发现、Gateway 探测、日志、doctor、升级、设备、通道、模型、Agent、会话、任务、插件、记忆、OpenClaw 内部 MCP 配置
 - **系统操作**：`server_reboot`、`server_firewall`、`server_updates`、`server_selinux`、`server_ping`
 
@@ -32,7 +33,12 @@ SSH_KEY_PATH=C:\\Users\\you\\.ssh\\id_ed25519
 # CRED_JP_ROOT_USER=root
 # CRED_JP_ROOT_SSH_PASSWORD=replace-with-jp-password
 
-COMPOSE_ROOT=/data/compose
+COMPOSE_ROOT=/opt/1panel/apps/local
+
+# 1Panel API：默认使用 V2 API，API Key 在 1Panel 设置里生成。
+ONEPANEL_URL=http://localhost:4444
+ONEPANEL_API_PREFIX=/api/v2
+ONEPANEL_API_KEY=replace-with-1panel-api-key
 
 # OpenClaw：本机安装时使用 CLI；Docker Compose 安装时填写 compose 目录。
 OPENCLAW_CLI_PATH=openclaw
@@ -63,6 +69,22 @@ npm run dev
 npm run build
 npm run start
 ```
+
+## 1Panel API 工具
+
+1Panel 工具通过 SSH 在目标主机上调用面板本机 API。默认前缀是 `/api/v2`，与 1Panel V2 Swagger 的 `basePath` 一致。
+
+只读工具：
+
+- `onepanel_apps_list`：调用 `POST /apps/installed/search`，分页查询 1Panel 已安装应用。
+- `onepanel_websites_list`：调用 `POST /websites/search`，分页查询 1Panel 管理的网站。
+- `onepanel_device_base`：调用 `POST /toolbox/device/base`，读取主机基础设备信息。
+- `onepanel_api`：受限原始入口，只允许 `GET` 或已确认只读的白名单 `POST` 路径，用于临时调用未封装的 V2 端点。
+
+鉴权使用 1Panel V2 API Key 签名头：
+
+- `1Panel-Token = md5("1panel" + ONEPANEL_API_KEY + timestamp)`
+- `1Panel-Timestamp = timestamp`
 
 ## OpenClaw 管理工具
 
@@ -106,13 +128,14 @@ Portainer 管理 Compose stack 时，`/data/compose` 可能只有 `1`、`2`、`3
 - `compose_ps` 和 `compose_logs` 按 label 查询容器。
 - `compose_pull` 拉取匹配容器正在使用的镜像。
 - `compose_up` 和 `compose_down` 只启动或停止匹配容器，不删除 Portainer stack 定义。
-- `compose_update` 使用一次性 Watchtower（`DOCKER_API_VERSION=1.40`）更新并重建匹配容器。
+- `compose_update` 拉取匹配镜像并停止、删除旧容器；1Panel/Portainer 场景下需随后通过面板或 `compose_up` 重新拉起。
 
 ## 权限边界
 
 - `mcpops` 只放行白名单主机。
 - `sudoers` 只放行需要的 systemd 和防火墙命令。
 - Docker 访问通过 `docker` 组或单独 sudoers 授权。
+- 1Panel API 仅通过配置的 `ONEPANEL_URL` 和 `ONEPANEL_API_PREFIX` 访问，不暴露通用 shell。
 - OpenClaw 工具只调用 `openclaw` CLI 或 Compose CLI sidecar，不提供任意 shell 执行。
 - 可选白名单限制特定 systemd 服务和 Compose 项目。
 
@@ -122,7 +145,7 @@ Portainer 管理 Compose stack 时，`/data/compose` 可能只有 `1`、`2`、`3
 - **审计日志**：所有 destructive 操作记录到 `mcp/audit.log`。
 - **白名单控制**：可选的服务和 Compose 项目白名单。
 - **密钥优先**：优先使用 SSH 密钥认证，密码作为备选。
-- **参数约束**：OpenClaw 路径、服务名、环境变量和 CLI 参数都经过 schema 校验。
+- **参数约束**：1Panel API 路径、OpenClaw 路径、服务名、环境变量和 CLI 参数都经过 schema 校验。
 
 ## 不要提交的本地文件
 

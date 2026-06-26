@@ -9,6 +9,7 @@
 3. 不开放任意 shell 执行。
 4. SSH 连接全部通过密钥认证。
 5. OpenClaw 管理只通过 `openclaw` CLI 或 Compose CLI sidecar，不扩展为通用远程 shell。
+6. 1Panel 管理只通过 V2 API Key 签名调用，不复用 Web 登录会话。
 
 ## 推荐工具
 
@@ -27,6 +28,10 @@
 - `compose_logs`
 - `compose_up`
 - `compose_down`
+- `onepanel_apps_list`
+- `onepanel_websites_list`
+- `onepanel_device_base`
+- `onepanel_api`
 - `openclaw_discover`
 - `openclaw_status`
 - `openclaw_gateway_probe`
@@ -68,6 +73,7 @@
 - 多客户端共享：`streamable HTTP`
 - SSH 认证：专用运维账号 + `sudo` 白名单
 - 审计：把重启类操作写入本地日志或外部日志系统
+- 1Panel：设置 `ONEPANEL_URL`、`ONEPANEL_API_PREFIX=/api/v2` 和 `ONEPANEL_API_KEY`
 - OpenClaw：本机 CLI 用 `OPENCLAW_CLI_PATH`，Compose 部署用 `OPENCLAW_COMPOSE_DIR`、`OPENCLAW_CLI_SERVICE` 和 `OPENCLAW_GATEWAY_SERVICE`
 
 ## 相关文档
