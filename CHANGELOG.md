@@ -2,6 +2,17 @@
 
 [← 返回 README](README.md)
 
+## 2026-06-26
+
+- 外网入口从原生 `reverse-nginx` 迁移至 1Panel OpenResty（`1Panel-openresty-M3iP`）。
+- Portainer 移除，Docker 管理统一到 1Panel 集成面板。
+- Docker 网络从单一 `proxy` 拆分为 `public_proxy`（外网入口层）和 `internal_proxy`（内网入口层）。
+- Cloudflare Tunnel 回源目标调整为 `http://public-openresty:80`。
+- 1Panel OpenResty 配置迁移至 `/opt/1panel/www/conf.d/`，反向代理规则拆分至各站点 `proxy/` 目录。
+- 修复 `blog.yuuyan.top` 启用1Panel 证书后的重定向循环（HTTPS 策略改为 `HTTPAlso`）。
+- 内网域名（`*.yuu.lan`）暂停启用，内网服务改以 IP 直接访问。
+- 更新 README、dual-nginx-design.md、operations-guide.md 反映迁移后架构。
+
 ## 2026-06-02
 
 - MCP 运维服务新增 OpenClaw 管理能力：

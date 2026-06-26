@@ -2,37 +2,40 @@
 
 本页记录 HomeLab 的日常维护和故障排查方式。目标很简单：改动能复现，出问题能回退，也能查到原因。
 
-本文假设读者已了解双 Nginx 入口设计，详见 [dual-nginx-design.md](dual-nginx-design.md)。
+本文假设读者已了解双入口设计，详见 [dual-nginx-design.md](dual-nginx-design.md)。
 
 ## 目录约定
 
-真实环境按服务拆分 Compose 项目：
+真实环境服务由 1Panel 管理，Compose 项目按数字 ID 存放：
 
 ```text
 /data/compose/
-├── reverse-nginx/
-├── cloudflared/
-├── halo/
-├── uptime-kuma/
-├── homepage/
-├── adguardhome/
-├── nginx-proxy-manager/
-└── portainer/
+├── 1/    (cloudflared)
+├── 2/    (halo + halo-postgres)
+├── 3/    (uptime-kuma)
+├── 7/    (adguardhome)
+├── 8/    (homepage)
+├── 9/    (nginx-proxy-manager)
+├── 13/   (ddns-go)
+└── 17/   (...)
 ```
 
-公开仓库只保存脱敏后的 `.example.yml` 和 `.example.conf`。Nginx 配置文件布局见[双 Nginx 入口架构 · 配置组织](dual-nginx-design.md#配置组织)。
+1Panel OpenResty 配置存放在 `/opt/1panel/www/`，见[双入口架构 · 配置组织](dual-nginx-design.md#配置组织)。
+
+公开仓库只保存脱敏后的 `.example.yml` 和 `.example.conf`。
 
 ## 常用检查命令
 
-**reverse-nginx**
+**1Panel OpenResty（public-openresty）**
 
 ```bash
 docker ps
 docker network ls
-docker network inspect proxy
-docker logs reverse-nginx --tail=100
-docker exec reverse-nginx nginx -t
-docker exec reverse-nginx nginx -s reload
+docker network inspect public_proxy
+docker network inspect internal_proxy
+docker logs 1Panel-openresty-M3iP --tail=100
+docker exec 1Panel-openresty-M3iP openresty -t
+docker exec 1Panel-openresty-M3iP openresty -s reload
 ```
 
 **cloudflared**
@@ -76,7 +79,7 @@ docker logs ddns-go --tail=100
 
 1. 修改真实环境配置。
 2. 检查配置语法：
-   - Nginx：`docker exec reverse-nginx nginx -t`
+   - OpenResty：`docker exec 1Panel-openresty-M3iP openresty -t`
    - Compose：`docker compose config`（在对应服务目录执行）
 3. 重载服务。
 4. 验证公网、内网、WireGuard 三类访问路径。变更前可参考[职责边界](dual-nginx-design.md#职责边界)确认影响范围。
@@ -85,13 +88,14 @@ docker logs ddns-go --tail=100
 
 ## 备份建议
 
-优先备份这些内容（数据路径均在 `/data/compose/<service>/` 下）：
+优先备份这些内容：
 
-- Halo 数据库和附件（`/data/compose/halo/`）。
-- Uptime Kuma 数据目录（`/data/compose/uptime-kuma/`）。
-- AdGuard Home 配置（`/data/compose/adguardhome/`）。
-- Homepage 配置（`/data/compose/homepage/`）。
-- reverse-nginx 配置（`/data/compose/reverse-nginx/`）。
+- Halo 数据库和附件（`/data/compose/2/`）。
+- Uptime Kuma 数据目录（`/data/compose/3/`）。
+- AdGuard Home 配置（`/data/compose/7/`）。
+- Homepage 配置（`/data/compose/8/`）。
+- 1Panel OpenResty 配置（`/opt/1panel/www/`）。
+- 1Panel 数据库（`/opt/1panel/db/agent.db`）。
 
 Homepage 示例在 `examples/compose/homepage/`，里面保留了服务分组、公开/内网区分和允许主机设置。
 
@@ -104,7 +108,7 @@ Uptime Kuma 至少监控：
 - 公网博客和状态页
 - 内网关键服务
 - Tunnel 可用性
-- Nginx 入口服务
+- OpenResty 入口服务
 
 Uptime Kuma 管理界面通过内网（`kuma.yuu.lan`）或 WireGuard VPN 访问，监控项在 Web UI 中配置。公开状态页只显示状态页内容，不暴露内部管理服务清单。
 
@@ -114,17 +118,17 @@ Uptime Kuma 管理界面通过内网（`kuma.yuu.lan`）或 WireGuard VPN 访问
 
 ```bash
 docker ps
-docker logs reverse-nginx --tail=100
-docker exec reverse-nginx nginx -t
-docker network inspect proxy
+docker logs 1Panel-openresty-M3iP --tail=100
+docker exec 1Panel-openresty-M3iP openresty -t
+docker network inspect public_proxy
 ```
 
 常见原因：
 
 - 后端容器未运行。
-- 后端容器未加入 `proxy` 网络。
+- 后端容器未加入 `public_proxy` 网络。
 - `proxy_pass` 使用的容器名或端口错误。
-- Cloudflare Tunnel 指向的服务名错误。
+- Cloudflare Tunnel 回源目标错误（应为 `http://public-openresty:80`）。
 
 ### 域名不解析
 
@@ -174,33 +178,34 @@ docker inspect cloudflared
 常见原因：
 
 - Tunnel token 失效。
-- `cloudflared` 容器没有加入 `proxy` 网络。
+- `cloudflared` 容器没有加入 `public_proxy` 网络。
 - Cloudflare public hostname 指向了不存在的服务名。
 
 ### Cloudflare Tunnel 连通但页面 404
 
 ```bash
-docker exec reverse-nginx nginx -t
-docker network inspect proxy
+docker exec 1Panel-openresty-M3iP openresty -t
+docker network inspect public_proxy
 ```
 
 检查：
 
-- Cloudflare 控制台中 public hostname 配置的服务名是否与 Nginx `server_name` 一致（注意区分仓库中的 `.example.yml` 示例文件与实际运行配置）。
-- `reverse-nginx` 是否在 `proxy` 网络里。
-- 入口路径是否被 Nginx 的 `location` 规则拦截。
+- Cloudflare 控制台中 public hostname 回源目标是否为 `http://public-openresty:80`。
+- `1Panel-openresty-M3iP` 是否在 `public_proxy` 网络里。
+- 入口路径是否被 OpenResty 的 `location` 规则拦截。
+- `server_name` 是否与访问域名一致。
 
 ### Nginx Proxy Manager 内网入口异常
 
 ```bash
 docker logs nginx-proxy-manager --tail=100
-docker network inspect proxy
+docker network inspect internal_proxy
 ```
 
 常见原因：
 
 - NPM proxy host 配置的后端地址或端口错误。
-- 后端容器未加入 `proxy` 网络。
+- 后端容器未加入 `internal_proxy` 网络。
 - SSL 证书过期或配置错误。
 - NPM 访问列表规则阻止了请求。
 
@@ -250,7 +255,7 @@ fake-ip-filter:
 
 ### Uptime Kuma 状态页误进后台
 
-公网 Nginx 只允许状态页路径：
+公网 OpenResty 只允许状态页路径：
 
 - `/status/` 允许代理。
 - `/` 跳转到状态页。
@@ -258,25 +263,32 @@ fake-ip-filter:
 
 示例见 [status.yuuyan.top.example.conf](../examples/nginx/status.yuuyan.top.example.conf)。
 
-### Nginx 配置修改后无效
+### OpenResty 配置修改后无效
 
 ```bash
-docker exec reverse-nginx nginx -t
-docker exec reverse-nginx nginx -s reload
-docker logs reverse-nginx --tail=100
+docker exec 1Panel-openresty-M3iP openresty -t
+docker exec 1Panel-openresty-M3iP openresty -s reload
+docker logs 1Panel-openresty-M3iP --tail=100
 ```
+
+1Panel 编辑站点后可能按模板重写配置，检查是否覆盖了以下自定义规则：
+
+- `blog.yuuyan.top`：`/console` 和 `/uc` 返回 404 的 location 块
+- `blog.yuuyan.top`：HTTPS 策略应为 `HTTPAlso`，不应有 80 → 443 强制跳转
+- `halo-admin.yuuyan.top`：`/` 重定向到 `/console`
+- `status.yuuyan.top`：WebSocket header
 
 如果使用挂载配置文件，检查实际挂载路径：
 
 ```bash
-docker inspect reverse-nginx | grep -A 20 Mounts
+docker inspect 1Panel-openresty-M3iP | grep -A 20 Mounts
 ```
 
-容器内配置路径通常为 `/etc/nginx/conf.d/`，确认宿主机挂载路径与之一致。
+容器内配置路径通常为 `/usr/local/openresty/nginx/conf/conf.d/`。
 
 ## 相关文档
 
-- [双 Nginx 入口架构](dual-nginx-design.md)
+- [双入口架构](dual-nginx-design.md)
 - [WireGuard + DDNS-Go 私有管理链路](wireguard-ddnsgo-design.md)
 - [README.md](../README.md)
 - [Nginx 示例配置](../examples/nginx/)

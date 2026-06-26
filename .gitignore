@@ -27,6 +27,7 @@ backups/
 # Local reports and source documents
 HomeLab_.docx
 HomeLab_.pdf
+HomeLab_设计书.md
 *.docx
 *.pdf
 
@@ -54,6 +55,9 @@ __pycache__/
 .claude/
 server-health-report.md
 tools/server_health_check.py
+
+# Node modules
+node_modules/
 
 # MCP server local artifacts
 /mcp/node_modules/
