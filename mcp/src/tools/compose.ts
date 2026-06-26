@@ -9,7 +9,8 @@ import {
   destructiveTool,
   remoteCommandInDir,
   safeComposeProjectPath,
-  shellQuote
+  shellQuote,
+  scrubSensitiveValues
 } from "../helpers.js";
 import type { Deps } from "./deps.js";
 
@@ -60,6 +61,25 @@ function dockerLabelServiceFilter(project: ResolvedProject, service?: string): s
   return service
     ? [...dockerLabelFilter(project), "--filter", `label=com.docker.compose.service=${service}`]
     : dockerLabelFilter(project);
+}
+
+function redactComposeConfigOutput(value: string): string {
+  const sensitiveKeyLine = /^(\s*(?:-\s*)?(?:CLOUDFLARED_TOKEN|HALO_DB_PASSWORD|POSTGRES_PASSWORD|MYSQL_ROOT_PASSWORD|MYSQL_PASSWORD|PASSWORD|TOKEN|SECRET|API_KEY|ACCESS_KEY|PRIVATE_KEY|.*(?:token|password|secret|credential|api.?key|access.?key|private.?key).*)\s*:\s*).+$/i;
+  const sensitiveAssignmentLine = /^(\s*-\s*(?:[^=\s]*(?:token|password|secret|credential|api.?key|access.?key|private.?key)[^=\s]*)=).+$/i;
+  const sensitiveCommandAssignment = /(password|token|secret|credential|api.?key|access.?key|private.?key)=([^'"`\s]+)/gi;
+
+  return value
+    .split(/\r?\n/)
+    .map((line) => {
+      if (sensitiveKeyLine.test(line)) {
+        return line.replace(sensitiveKeyLine, "$1[redacted]");
+      }
+      if (sensitiveAssignmentLine.test(line)) {
+        return line.replace(sensitiveAssignmentLine, "$1[redacted]");
+      }
+      return line.replace(sensitiveCommandAssignment, "$1=[redacted]");
+    })
+    .join("\n");
 }
 
 function projectMatches(project: ProjectEntry, requested: string, composeRoot: string): boolean {
@@ -278,16 +298,16 @@ export function registerComposeTools({ server, config, ssh, assertAllowedHost }:
       }
       const result = await ssh.runSsh(host, remoteCommandInDir(resolved.path, "docker compose config"));
       return {
-        content: jsonText({
+        content: jsonText(scrubSensitiveValues({
           host: host.host,
           project,
           resolvedProject: resolved.name,
           path: resolved.path,
           mode: resolved.mode,
-          stdout: result.stdout.trim(),
+          stdout: redactComposeConfigOutput(result.stdout.trim()),
           stderr: result.stderr.trim(),
           code: result.code
-        })
+        }))
       };
     }
   );

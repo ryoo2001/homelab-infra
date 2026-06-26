@@ -114,7 +114,7 @@ async function logDestructiveAction(toolName: string, args: any): Promise<void> 
   }
 }
 
-function scrubSensitiveValues(value: unknown): unknown {
+export function scrubSensitiveValues(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map((item, index) => {
       const previous = value[index - 1];
